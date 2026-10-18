@@ -12,5 +12,18 @@ function createClient() {
 }
 
 const g = globalThis as unknown as { __prisma?: PrismaClient };
-export const prisma = g.__prisma ?? createClient();
-if (process.env.NODE_ENV !== "production") g.__prisma = prisma;
+
+function client(): PrismaClient {
+  g.__prisma ??= createClient();
+  return g.__prisma;
+}
+
+// Created on first use, not at import time, so `next build` works without DATABASE_URL
+// (hosts like Railway often only provide it at runtime).
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_t, prop) {
+    const c = client();
+    const v = Reflect.get(c, prop, c);
+    return typeof v === "function" ? v.bind(c) : v;
+  },
+});
