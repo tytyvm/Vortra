@@ -1,0 +1,150 @@
+// Vortra data model.
+// Local dev uses SQLite. For production the Dockerfile switches the provider line to
+// "postgresql" (see README). The schema avoids Json/enum/@db types so it works on both;
+// JSON payloads are stored as text and validated in app code.
+// The connection URL lives in prisma.config.ts (DATABASE_URL).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  timezone         String   @default("UTC")
+  recapDaily       Boolean  @default(true)
+  recapWeekly      Boolean  @default(true)
+  lastDailyRecap   String? // local YYYY-MM-DD of the last daily recap sent
+  lastWeeklyRecap  String? // local YYYY-MM-DD of the last weekly recap sent
+  plan             String   @default("free") // subscription plan key from config
+  stripeCustomerId String?  @unique
+  createdAt        DateTime @default(now())
+
+  profile   Profile?
+  sessions  Session[]
+  messages  Message[]
+  meals     MealLog[]
+  exercises ExerciseLog[]
+  weights   WeightLog[]
+  plans     Plan[]
+  usage     Usage[]
+}
+
+model Profile {
+  userId    String   @id
+  data      String   @default("{}") // JSON: stats, goal, targets, preferences, injuries...
+  summary   String   @default("") // running conversation summary written by the model
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id        String   @id // sha256 of the cookie token
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model LoginToken {
+  tokenHash String    @id
+  email     String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  userId    String
+  role      String // "user" | "assistant"
+  content   String
+  hasImage  Boolean  @default(false)
+  kind      String   @default("chat") // "chat" | "recap"
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model MealLog {
+  id        String   @id // "m_..."
+  userId    String
+  day       String // local YYYY-MM-DD in the user's time zone
+  loggedAt  DateTime
+  meal      String // breakfast | lunch | dinner | snack | other
+  items     String // JSON array of items
+  kcal      Float
+  proteinG  Float
+  carbsG    Float
+  fatG      Float
+  fiberG    Float
+  notes     String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, day])
+}
+
+model ExerciseLog {
+  id          String   @id // "x_..."
+  userId      String
+  day         String
+  loggedAt    DateTime
+  exercise    String
+  sets        String // JSON array of sets
+  sessionType String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, day])
+}
+
+model WeightLog {
+  id        String   @id // "w_..."
+  userId    String
+  day       String
+  loggedAt  DateTime
+  weight    Float
+  unit      String // "lb" | "kg"
+  weightKg  Float
+  notes     String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, day])
+}
+
+model Plan {
+  id        String   @id @default(cuid())
+  userId    String
+  data      String // structured JSON plan
+  text      String // readable plan
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model Usage {
+  id           String   @id @default(cuid())
+  userId       String?
+  kind         String // "chat" | "photo" | "recap"
+  provider     String
+  model        String
+  inputTokens  Int
+  outputTokens Int
+  costUsd      Float
+  createdAt    DateTime @default(now())
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull) // kept (anonymized) so app-wide spend stays accurate
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}

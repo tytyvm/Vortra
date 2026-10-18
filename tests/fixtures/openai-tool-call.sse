@@ -1,0 +1,14 @@
+data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1760000000,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"call_abc","type":"function","function":{"name":"log_meal","arguments":""}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1760000000,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\"meal\":\"breakfast\",\"items\":[{\"name\":\"Egg\","}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1760000000,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\"portion\":\"2 large\",\"kcal\":144,\"protein_g\":12.6,\"carbs_g\":0.8,\"fat_g\":9.6}]}"}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1760000000,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{"tool_calls":[{"index":1,"id":"call_def","type":"function","function":{"name":"log_weight","arguments":"{\"weight\":182.4,\"unit\":\"lb\"}"}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1760000000,"model":"gpt-4o-mini","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: {"id":"chatcmpl-1","object":"chat.completion.chunk","created":1760000000,"model":"gpt-4o-mini","choices":[],"usage":{"prompt_tokens":1520,"completion_tokens":64,"total_tokens":1584,"prompt_tokens_details":{"cached_tokens":1024}}}
+
+data: [DONE]
+

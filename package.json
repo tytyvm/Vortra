@@ -1,0 +1,34 @@
+{
+  "name": "vortra",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vortra: a personal AI fitness and nutrition coach you chat with.",
+  "scripts": {
+    "mock": "node scripts/mock.mjs",
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "db:push": "prisma db push",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "live-test": "tsx scripts/live-test.ts"
+  },
+  "dependencies": {
+    "@prisma/adapter-better-sqlite3": "7.10.1",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "next": "15.5.27",
+    "prisma": "7.10.1",
+    "react": "19.1.10",
+    "react-dom": "19.1.10",
+    "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}
