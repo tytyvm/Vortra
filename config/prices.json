@@ -2,6 +2,7 @@
   "_note": "USD per 1M tokens. Used only to ESTIMATE cost for spend ceilings and the usage table. Prices change: check your provider's pricing page and edit this file. Lookup is exact model id first, then the longest matching prefix, then 'default'. 'cachedInput' is optional.",
   "default": { "input": 3.0, "output": 15.0 },
   "mock": { "input": 0, "output": 0 },
+  "claude-haiku-5-5": { "input": 0.10, "output": 0.50, "cachedInput": 0.01 },
 
   "gpt-4o-mini": { "input": 0.15, "output": 0.6, "cachedInput": 0.075 },
   "gpt-4o": { "input": 2.5, "output": 10.0, "cachedInput": 1.25 },
