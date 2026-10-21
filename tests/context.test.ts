@@ -4,7 +4,7 @@ import { buildContextBlock, trimHistory } from "@/lib/coach/context";
 import { prisma } from "@/lib/db";
 import { setProviderOverride } from "@/lib/llm";
 import { MockProvider } from "@/lib/llm/mock";
-import type { ChatMessage } from "@/lib/llm/types";
+import { estimateRequestTokens, type ChatMessage } from "@/lib/llm/types";
 import { makeUser, NOW, resetDb } from "./helpers";
 
 const u = (t: string): ChatMessage => ({ role: "user", content: [{ type: "text", text: t }] });
@@ -74,7 +74,8 @@ describe("what the model receives", () => {
     process.env.MAX_INPUT_TOKENS = String(Math.ceil(fixed + 200));
     await runCoachTurn({ userId: user.id, text: "another", now: NOW });
     const sent2 = mock2.requests[0].messages;
-    expect(sent2.length).toBeLessThan(5);
+    expect(sent2.length).toBeLessThan(sent.length);
+    expect(estimateRequestTokens(mock2.requests[0])).toBeLessThanOrEqual(Number(process.env.MAX_INPUT_TOKENS) + 10);
     expect(sent2[0].role).toBe("user");
     const last = sent2[sent2.length - 1];
     expect(last.role === "user" && last.content.some((c) => c.type === "text" && c.text === "another")).toBe(true);

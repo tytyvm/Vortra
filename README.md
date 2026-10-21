@@ -156,6 +156,21 @@ This sends 10 scripted messages (setup, meals, a correction, a weigh-in, a worko
 
 The app is a single service: one Next.js server plus Postgres.
 
+**Railway**
+
+The repo includes `railway.json`, so Railway builds it with the Dockerfile and health-checks `/api/health`.
+
+1. In Railway, choose New Project → Deploy from GitHub repo, and pick this repo.
+2. In the same project, choose + New → Database → PostgreSQL.
+3. Open the app service and go to Settings → Networking → Generate Domain. Copy the URL.
+4. In the app service, open Variables and add:
+   - `DATABASE_URL` = `${{Postgres.DATABASE_URL}}`
+   - `APP_URL` = the domain from step 3, starting with `https://`
+   - `LLM_PROVIDER`, `LLM_MODEL` and that provider's key. You can use `LLM_PROVIDER=mock` for a first test.
+   - `EMAIL_PROVIDER=resend`, `RESEND_API_KEY` and `EMAIL_FROM`. Without a verified domain, Resend only delivers to the email you signed up to Resend with, from `onboarding@resend.dev`.
+   - Optionally `USER_MONTHLY_LIMIT_USD` and `APP_DAILY_LIMIT_USD`.
+5. Redeploy. When the app starts, it creates the tables with `prisma db push`.
+
 **Docker**
 
 ```bash
