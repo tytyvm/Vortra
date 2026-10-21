@@ -28,6 +28,8 @@ export interface TurnInput {
 export const NO_VISION_MESSAGE =
   "I can't view photos with the current setup. Could you describe the meal instead (foods, rough portions, brand or restaurant if any)? I'll estimate it from that.";
 export const NO_PHOTOS_ON_PLAN = "Photo logging isn't included on your current plan. Describe the meal in words and I'll estimate it.";
+export const EMPTY_REPLY_MESSAGE =
+  "Sorry, I couldn't finish that reply. Please try again, or ask for a shorter answer.";
 export const PROVIDER_ERROR_MESSAGE = "Sorry, I couldn't reach the coach just now. Please try again in a moment.";
 
 export async function runCoachTurn(input: TurnInput) {
@@ -74,6 +76,8 @@ export async function runCoachTurn(input: TurnInput) {
   let fullText = "";
   let costUsd = 0;
   let rounds = 0;
+  let lastStop = "";
+  let lastOut = 0;
 
   try {
     for (let round = 0; round < c.limits.maxToolRounds; round++) {
@@ -104,6 +108,8 @@ export async function runCoachTurn(input: TurnInput) {
         },
       });
       rounds++;
+      lastStop = res.stopReason;
+      lastOut = res.usage.outputTokens;
       // Providers that don't stream still return text; make sure it is captured.
       if (!started && res.text) {
         const sep = fullText ? "\n\n" : "";
@@ -135,8 +141,12 @@ export async function runCoachTurn(input: TurnInput) {
 
   if (fullText.trim()) {
     await prisma.message.create({ data: { userId: user.id, role: "assistant", content: fullText } });
+  } else {
+    // Never fail silently: an empty reply usually means the output token limit was hit.
+    log.warn("empty_reply", { model: choice.model, stop: lastStop, outputTokens: lastOut });
+    emit({ type: "error", message: EMPTY_REPLY_MESSAGE });
   }
-  log.info("turn", { rounds, model: choice.model, photo: !!input.image });
+  log.info("turn", { rounds, model: choice.model, photo: !!input.image, stop: lastStop, outputTokens: lastOut });
   emit({ type: "done" });
   return { reply: fullText, rounds, costUsd };
 }
